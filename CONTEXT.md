@@ -1,0 +1,177 @@
+# Steel Golem
+
+A personal Director assistant for the Draw Steel TTRPG system, tracking campaign state and providing rules reference.
+
+## Language
+
+### System
+
+**Entity**:
+A first-class domain object with its own identity and lifecycle, independently addressable and referenceable.
+_Avoid_: object, record, document
+
+**Context**:
+A named term defined in this glossary; shared language for the system.
+_Avoid_: concept, idea, term
+
+**Scope**:
+The level at which an Entity belongs — either Campaign-scope or Adventure-scope.
+_Avoid_: level, tier
+
+**Promotion**:
+The act of moving an Entity from Adventure-scope to Campaign-scope, or from embedded content within a parent Entity to its own first-class Entity.
+_Avoid_: upgrade, elevation
+
+### Campaign Structure
+
+**Campaign**:
+The top-level container for a long-running Draw Steel game; all other Entities belong to a Campaign.
+_Avoid_: game, setting
+
+**Adventure**:
+A self-contained narrative arc within a Campaign, with its own cast of Adventure-scoped Entities.
+_Avoid_: module, chapter, quest
+
+**Session**:
+A single real-world instance of play; Campaign-scoped but carries a reference to the Adventure active at the time.
+_Avoid_: game night, play session
+
+**Director**:
+The Draw Steel term for the game master who runs the game; the primary user of steel-golem.
+_Avoid_: DM, GM, dungeon master, game master
+
+### Characters & Groups
+
+**Hero**:
+A player character in Draw Steel; always Campaign-scoped.
+_Avoid_: player character, PC, character
+
+**Villain**:
+An antagonist controlled by the Director; Campaign- or Adventure-scoped.
+_Avoid_: enemy, boss, antagonist
+
+**BBEG** (Big Bad Evil Guy):
+The primary Campaign-scoped Villain driving the overarching Campaign Plot.
+_Avoid_: main villain, final boss
+
+**NPC** (Non-Player Character):
+Any named character controlled by the Director who is not a Villain; Campaign- or Adventure-scoped.
+_Avoid_: character, person, ally
+
+**Faction**:
+A named group of characters sharing goals and interests; Campaign- or Adventure-scoped.
+_Avoid_: organization, group, guild
+
+**Custom Monster**:
+A homebrewed or modified creature unique to this Campaign, not found in the Draw Steel bestiary.
+_Avoid_: homebrew monster, variant, reskin
+
+### Narrative
+
+**Plot**:
+A Campaign-scoped named narrative arc spanning one or more Adventures.
+_Avoid_: storyline, story arc, campaign arc
+
+**Subplot**:
+An Adventure-scoped named narrative thread; may contribute to a parent Plot.
+_Avoid_: plot, storyline, side quest
+
+**Beat**:
+A discrete story-significant moment within a Session; Context only, not an Entity.
+_Avoid_: event, moment, scene
+
+### Locations & Items
+
+**Location**:
+A named place at any scale; Campaign- or Adventure-scoped; sub-locations may be embedded within a parent Location or Promoted to their own Entity.
+_Avoid_: place, area, region, dungeon
+
+**Notable Item**:
+A named item with a history and a current owner, significant enough to track independently; Campaign-scoped by default.
+_Avoid_: magic item, treasure, loot
+
+**Lore**:
+Cross-cutting world-building content not attributable to a single Entity; Campaign-scoped by default.
+_Avoid_: worldbuilding, setting notes, fluff
+
+**Handout**:
+A player-facing artifact revealed to Heroes during play; carries a revealed status; Adventure-scoped by default.
+_Avoid_: prop, document, player aid
+
+### Encounters
+
+**Encounter**:
+A discrete, preppable challenge for the Heroes with a defined type: Combat, Negotiation, or Montage.
+_Avoid_: fight, challenge, scene
+
+**Combat Encounter**:
+An Encounter resolved through tactical combat; involves a monster roster and an objective.
+_Avoid_: fight, battle
+
+**Negotiation**:
+An Encounter resolved through structured social mechanics; involves an NPC with Patience, Interest, motivations, and pitfalls.
+_Avoid_: social encounter, conversation
+
+**Montage**:
+An Encounter resolved through a series of coordinated skill tests toward a shared goal.
+_Avoid_: skill challenge, group test
+
+### Downtime
+
+**Respite**:
+A structured recovery period between Adventures where Heroes engage in Downtime Activities; Context only, not an Entity.
+_Avoid_: long rest, downtime, break
+
+**Downtime Activity**:
+An option a Hero may choose during a Respite (e.g., make a Project Roll, serve as a project source for another Hero); Context only, not an Entity.
+_Avoid_: downtime action, rest activity
+
+**Downtime Project**:
+A Director-designed goal for a Hero pursued across Respites, tracked by accumulated Project Points toward a Project Goal; Campaign- or Adventure-scoped Entity. Player-initiated projects are tracked on the character sheet outside steel-golem.
+_Avoid_: crafting project, research project, project
+
+**Project Points**:
+The unit of progress accrued toward a Downtime Project's Project Goal via Project Rolls.
+_Avoid_: progress, points
+
+**Project Goal**:
+The total Project Points required to complete a Downtime Project.
+_Avoid_: target, threshold, completion requirement
+
+**Project Roll**:
+A characteristic test made during a Respite that accrues Project Points toward a Downtime Project; even a poor roll accrues at least 1 point.
+_Avoid_: progress roll, downtime roll
+
+**Breakthrough**:
+A critical success (natural 19–20) on a Project Roll, granting an additional Project Roll within the same Respite.
+_Avoid_: critical, nat 20, crit success
+
+## Relationships
+
+- A **Campaign** contains one or more **Adventures** and is the root scope for all Campaign-scoped Entities.
+- An **Adventure** contains **Combat Encounters**, **Negotiations**, **Montages**, **NPCs**, **Villains**, **Locations**, **Factions**, **Subplots**, **Handouts**, **Custom Monsters**, and **Downtime Projects**.
+- A **Session** is Campaign-scoped but references a single **Adventure**; it contains **Beats**.
+- A **Hero** is always Campaign-scoped; a **Villain**, **NPC**, **Faction**, or **Location** may be Campaign- or Adventure-scoped.
+- A **Plot** is Campaign-scoped; a **Subplot** belongs to an **Adventure** and may reference a parent **Plot**.
+- A **Downtime Project** is owned by a **Hero** and accrues **Project Points** via **Project Rolls** toward a **Project Goal**.
+- A **Faction** may have **NPCs** and **Villains** as members.
+- A **Handout** carries a revealed status that determines its visibility to Heroes.
+- An Entity may be **Promoted** from Adventure-scope to Campaign-scope, or from embedded content to a first-class Entity.
+
+## Example dialogue
+
+> **Director:** "The Heroes really liked the merchant they met in Veltharion — I want her to keep coming back."
+> **Domain expert:** "She started as an Adventure-scoped NPC. Promote her to Campaign-scope and she'll be referenceable across all future Adventures."
+
+> **Director:** "Sera wants to forge a legendary sword. Does that go in her Hero file?"
+> **Domain expert:** "No — create a Downtime Project with Sera as the owner. The Project tracks Project Points and Project Goal independently so it's visible during session planning."
+
+> **Director:** "The BBEG's cult operates in every city the Heroes visit. Is that a Faction?"
+> **Domain expert:** "Yes — a Campaign-scoped Faction, since it spans Adventures. The local chapter they encounter in this Adventure might be an Adventure-scoped Faction that references the parent."
+
+## Flagged ambiguities
+
+- "Project" was used loosely to mean both a Downtime Activity (the choice a Hero makes during a Respite) and a Downtime Project (the tracked Entity). Resolved: **Downtime Activity** is the choice; **Downtime Project** is the Entity.
+- "Context" was used informally to mean "narrative prose embedded in a file." Resolved: **Context** means specifically a named term in this glossary.
+- "Session" could mean a real-world play session or an in-world time period. Resolved: **Session** always means a real-world play session; in-world time is tracked separately via date frontmatter on Session files.
+- **Downtime Project** could refer to either a Director-designed project or a player-initiated one. Resolved: steel-golem only tracks Director-created Downtime Projects; player-initiated projects belong on the character sheet.
