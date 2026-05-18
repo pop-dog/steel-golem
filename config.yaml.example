@@ -1,0 +1,2 @@
+# Path to your campaigns directory. Set this before running steel-golem commands.
+campaign_path: null
