@@ -16,9 +16,12 @@ Requires Python 3.11 or newer and [Claude Code](https://claude.ai/code).
 git clone --recurse-submodules https://github.com/wmyers09/steel-golem.git
 cd steel-golem
 pip install -e .
+./install.sh
 ```
 
 The `--recurse-submodules` flag pulls in `steel-compendium`, the Draw Steel rules corpus used by the rules-reference skill.
+
+`install.sh` sets up the Claude integration layer: it symlinks the agent definition and skill instruction files into `~/.claude/` so Claude Code discovers them, and symlinks `CONTEXT.md` and `steel-compendium` into `~/.steel-golem/` so the agent can find them at a stable path. The script is idempotent and safe to re-run after pulling new commits.
 
 ## Usage
 
