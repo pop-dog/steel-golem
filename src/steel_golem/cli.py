@@ -46,15 +46,48 @@ def adventures():
 
 
 @adventures.command()
-def new():
+@click.option("--name", required=True, help="Human-readable adventure name.")
+def new(name: str) -> None:
     """Create a new adventure."""
+    try:
+        adventure_root = scaffold.create_adventure(name=name)
+    except FileNotFoundError as exc:
+        click.echo(f"Error: {exc}")
+        sys.exit(1)
+    except (ValueError, FileExistsError) as exc:
+        click.echo(f"Error: {exc}")
+        sys.exit(1)
+    click.echo(f"Created adventure '{name}' at {adventure_root}")
 
 
 @adventures.command(name="set")
-def set_():
-    """Set the active adventure."""
+@click.argument("slug")
+def set_(slug: str) -> None:
+    """Set the active adventure to SLUG."""
+    try:
+        scaffold.set_adventure(slug=slug)
+    except FileNotFoundError as exc:
+        click.echo(f"Error: {exc}")
+        sys.exit(1)
+    click.echo(f"Active adventure set to '{slug}'")
 
 
 @adventures.command(name="list")
-def list_():
+def list_() -> None:
     """List all adventures."""
+    try:
+        adventures_list = scaffold.list_adventures()
+    except FileNotFoundError as exc:
+        click.echo(f"Error: {exc}")
+        sys.exit(1)
+
+    if not adventures_list:
+        click.echo("No adventures found.")
+        return
+
+    # Determine column width for slug
+    max_slug_len = max(len(a["slug"]) for a in adventures_list)
+
+    for adv in adventures_list:
+        marker = "*" if adv["current"] else " "
+        click.echo(f"{marker} {adv['slug']:<{max_slug_len}}   {adv['name']}")
