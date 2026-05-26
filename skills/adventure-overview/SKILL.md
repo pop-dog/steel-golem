@@ -2,9 +2,9 @@
 
 A collaborative session that builds a shared understanding of an Adventure's structure. The agent reads all entity files, walks through each Subplot as a card, surfaces Loose Entities, proposes new Subplots where warranted, agrees on the document shape, then generates `overview.md`.
 
-**Corrections are batched — no entity files are modified until the Director commits.**
+**Corrections are batched — no entity files are modified until the Director confirms.**
 
-The Director may say **commit** at any point to skip to the commit phase.
+The Director may say **commit** at any point to skip to the corrections summary. The agent always presents the summary and waits for **confirm** before writing anything to disk.
 
 ---
 
@@ -59,7 +59,7 @@ Open the session with a brief inventory. Do not begin Subplot cards yet.
 > - **Entities:** <total count> across <list of non-empty types>
 > - **Loose entities:** <count> (not yet assigned to any Subplot)
 >
-> I'll walk through each Subplot as a card, then cover Loose entities, then agree on the document shape before generating the overview. You can say **commit** at any time to skip ahead.
+> I'll walk through each Subplot as a card, then cover Loose entities, then agree on the document shape before generating the overview. You can say **commit** at any time to skip to the corrections summary — I'll always confirm with you before writing anything.
 >
 > Ready? I'll start with the Main Thread.
 
@@ -169,7 +169,7 @@ Wait for the Director's confirmation before proceeding to commit.
 
 ## Phase 5 — Commit
 
-After document planning is confirmed — or when the Director says **commit** at any point — present the corrections summary before writing anything.
+When the Director says **commit** — whether at the end of Phase 4 or at any earlier point — present the corrections summary. Never write to disk without it. Writing only happens after the Director says **confirm**.
 
 > ---
 > **Ready to commit.** Here's what I'll apply:
