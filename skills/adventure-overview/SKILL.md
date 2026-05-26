@@ -159,7 +159,7 @@ Omit any row from the table where there is no content. The default sections to c
 - **Faction Table** — Name, Description, Role in the adventure.
 - **NPC Spotlight** — NPCs appearing in 2+ Subplots, or flagged as critical by the Director.
 - **Notable Items** — Name, Description, Owner, plot-critical flag.
-- **Encounter Map** — Encounters grouped by Subplot with Villain and Location references.
+- **Encounter Map** — Encounters grouped by Subplot with Key Figure (Villain for Combat, NPC for Negotiation) and Location references.
 - **Handouts** — Name, Content summary, Revealed status.
 - **Loose Entities** — Entities not threaded into any Subplot after the session.
 
@@ -242,7 +242,7 @@ flowchart TD
 
 ## Encounter Map
 
-| Name | Type | Subplot | Villain | Location |
+| Name | Type | Subplot | Key Figure | Location |
 ...
 
 ## Handouts
