@@ -1,49 +1,28 @@
 # adventure-overview
 
-Generates a rich Director-facing reference document (`overview.md`) in the Adventure root. Invoke this skill **after** reviewing and enriching the imported Entities — it reads curated content, not raw extraction.
+A collaborative session that builds a shared understanding of an Adventure's structure. The agent reads all entity files, walks through each Subplot as a card, surfaces Loose Entities, proposes new Subplots where warranted, agrees on the document shape, then generates `overview.md`.
 
-**This skill does NOT modify any entity files.** It reads all entity files and writes only to `overview.md`.
+**Corrections are batched — no entity files are modified until the Director commits.**
 
----
-
-## Before you begin
-
-Confirm the Director's intent:
-
-- If they have provided focus instructions (e.g., "focus on the Villain's scheme", "emphasize the political subplots"), note them — they shape the output.
-- If `overview.md` already exists, tell the Director it will be overwritten and proceed.
+The Director may say **commit** at any point to skip to the commit phase.
 
 ---
 
-## Step 1 — Locate the active Adventure
+## Phase 0 — Read everything
 
-Read `~/.steel-golem/config.yaml` to get `campaign_path`.
-
-Read `<campaign_path>/index.md` and extract the `current_adventure` frontmatter field. This is the slug of the active Adventure.
-
-The Adventure root is: `<campaign_path>/adventures/<current_adventure>/`
-
-**Error handling:**
+Read `~/.steel-golem/config.yaml` for `campaign_path`. Read `<campaign_path>/index.md` for `current_adventure`.
 
 | Condition | Action |
 |-----------|--------|
-| `~/.steel-golem/config.yaml` does not exist | Tell the Director no campaign is active and suggest running the `campaigns-new` skill first. Stop. |
-| `current_adventure` is `null` or absent | Tell the Director no adventure is active and suggest running the `adventures-set` skill. Stop. |
-| The Adventure root directory does not exist | Tell the Director the slug points to a missing directory; suggest running `steel-golem adventures list` to verify. Stop. |
+| Config absent | Tell the Director no campaign is active; suggest `campaigns-new`. Stop. |
+| `current_adventure` is null | Tell the Director no adventure is active; suggest `adventures-set`. Stop. |
+| Adventure root missing | Suggest `steel-golem adventures list` to verify slug. Stop. |
 
----
+The Adventure root is: `<campaign_path>/adventures/<current_adventure>/`
 
-## Step 2 — Read the Adventure Summary
+Read `<adventure_root>/index.md` — the frontmatter holds `name` and `slug`; the body is the Adventure Summary.
 
-Read `<adventure_root>/index.md`. The YAML frontmatter contains `name` and `slug`. The body (after the closing `---`) is the Adventure Summary prose written during import.
-
-Note the adventure name for use in the output header.
-
----
-
-## Step 3 — Read all Entity files
-
-Read every `.md` file in the following directories under `<adventure_root>/`, if the directory exists. Directories that are absent or empty are silently skipped.
+Read every `.md` file in these directories (skip absent or empty directories silently):
 
 | Directory | Entity type |
 |-----------|-------------|
@@ -59,185 +38,231 @@ Read every `.md` file in the following directories under `<adventure_root>/`, if
 | `encounters/negotiations/` | Negotiation |
 | `encounters/montages/` | Montage |
 
-For each file, parse the YAML frontmatter. Collect these fields where present:
+Parse frontmatter for each file. Build:
 
-- `name`, `slug`, `description`
-- Relationship fields: `faction`, `location`, `villain`, `npc`, `plot`, `owner`, `hero`
-- Type-specific fields: `revealed` (Handouts), `project_goal`, `project_points` (Downtime Projects)
-
-Ignore `scope` — it is not used in the output.
-
-**Relationship rule:** If a relationship field is `null`, omit it from diagrams and tables entirely. Do not show it as "unknown" or "none".
+- A **slug-to-name map** for all entities.
+- A **Subplot membership map**: for each Subplot, collect entities whose descriptions, relationship fields, or the Adventure Summary prose associate them with that thread. Use narrative judgment where frontmatter is sparse.
+- A **villain-to-encounters map**: Combat Encounters with a non-null `villain` field.
+- A **Loose list**: entities not associated with any Subplot after the membership map is built.
+- The **Main Thread**: the Subplot (or chain of Subplots) that defines the central conflict — infer from entity density, Villain connections, and Adventure Summary. Mark it as your best guess; the Director will confirm or correct.
 
 ---
 
-## Step 4 — Build the relationship index
+## Phase 1 — Orientation summary
 
-Before generating output, build an in-memory index for cross-referencing:
+Open the session with a brief inventory. Do not begin Subplot cards yet.
 
-- A slug-to-name map for all entities (so diagrams use display names, not slugs).
-- A subplot-to-entities map: for each Subplot, collect NPCs, Villains, Locations, Encounters, Factions, and Handouts that reference it — **note:** entity files do not carry a `subplot` field directly. Use the Subplot's own description and the narrative prose from entity descriptions to group entities. Where explicit subplot membership cannot be determined from frontmatter alone, use narrative judgment based on the Adventure Summary and entity descriptions.
-- A villain-to-encounters map: Combat Encounters that reference a Villain via the `villain` field.
-- A subplot-to-plot map: Subplots that carry a non-null `plot` field.
+> **Adventure: <Adventure Name>**
+>
+> Here's what I found:
+> - **Subplots:** <count> — Main Thread candidate: *<Subplot name>*
+> - **Entities:** <total count> across <list of non-empty types>
+> - **Loose entities:** <count> (not yet assigned to any Subplot)
+>
+> I'll walk through each Subplot as a card, then cover Loose entities, then agree on the document shape before generating the overview. You can say **commit** at any time to skip ahead.
+>
+> Ready? I'll start with the Main Thread.
 
 ---
 
-## Step 5 — Generate `overview.md`
+## Phase 2 — Subplot cards
 
-Write `<adventure_root>/overview.md`. Overwrite if it already exists.
+Present one card per Subplot, starting with the Main Thread, then secondary Subplots ordered by their connection to the Main Thread (most connected first).
 
-The file uses Markdown with Mermaid code blocks. It has no YAML frontmatter.
+For each Subplot, present:
 
-### Structure
+> ---
+> **Subplot: <Name>** *(Main Thread)* ← only on the first card if applicable
+>
+> **Arc:** <one-sentence description of the Subplot's narrative arc, drawn from the Subplot's description field and Adventure Summary>
+>
+> **Connects to:** <parent Plot name, or "standalone"> 
+>
+> **Entities in this thread:**
+> | Type | Name | Role / Notes |
+> |------|------|--------------|
+> | Villain | Warden Groth | Drives the central conflict |
+> | NPC | Mira | Unwilling informant |
+> | Location | Cell Block C | Primary encounter site |
+> | Combat Encounter | The Handoff | Climax of this thread |
+>
+> *(Role / Notes drawn from entity `description` fields, truncated to ~80 characters)*
+>
+> **My read:** <one sentence synthesising what this Subplot is about and how it connects to the adventure as a whole>
+>
+> Does this look right? Anything to add, remove, correct, or rename?
+
+Wait for the Director's response. Apply any corrections to the **corrections batch** — do not write to disk yet. Reference the corrected version in subsequent cards.
+
+If the Director says the Main Thread candidate is wrong, update your internal Main Thread designation before presenting remaining cards.
+
+---
+
+## Phase 3 — Loose entities card
+
+After all Subplot cards, present the Loose entities.
+
+First, look for **clusters**: groups of 3 or more Loose entities whose descriptions, locations, or relationship fields suggest they belong to a common narrative thread the import may have missed.
+
+> ---
+> **Loose Entities** — <count> entities not yet threaded into a Subplot
+>
+> *(If clusters found):*
+> I noticed a possible undiscovered thread:
+>
+> **Possible Subplot: <proposed name>**
+> These entities seem to belong together — <one sentence explaining the pattern you observed>:
+> - <Entity type>: <Name> — <brief note>
+> - <Entity type>: <Name> — <brief note>
+>
+> Want to create this Subplot and thread them in?
+>
+> *(Remaining Loose entities not in any cluster):*
+> | Type | Name | Notes |
+> |------|------|-------|
+> | NPC | The Blacksmith | Description mentions the vault but no Subplot |
+>
+> For each: do you want to thread it into an existing Subplot, leave it Loose, or note it for removal?
+
+If the Director approves a new Subplot, add it to the corrections batch (new file to create: `subplots/<slug>.md`) and update entity associations accordingly.
+
+If there are no Loose entities, skip this phase and say so briefly.
+
+---
+
+## Phase 4 — Document planning
+
+Propose the Adventure Overview sections based on what the adventure actually contains. Only propose sections with content.
+
+> ---
+> **Adventure Overview — proposed sections**
+>
+> Based on our walkthrough, here's what I'd include:
+>
+> | # | Section | Why |
+> |---|---------|-----|
+> | 1 | Adventure Flowchart | <count> Subplots, <count> Plot connections |
+> | 2 | Subplot Summaries | <count> Subplots including Main Thread |
+> | 3 | Faction Table | <count> Factions with clear roles |
+> | 4 | NPC Spotlight | <names> appear across multiple Subplots |
+> | 5 | Notable Items | <count> items, <name> flagged as plot-critical |
+> | 6 | Encounter Map | <count> Encounters sequenced by Subplot |
+> | 7 | Handouts | <count> handouts (<count> revealed) |
+> | 8 | Loose Entities | <count> remaining after threading |
+>
+> Anything to add, remove, or reorder?
+
+Omit any row from the table where there is no content. The default sections to consider are:
+
+- **Adventure Flowchart** — Mermaid `flowchart TD`: Subplots → parent Plots, Villain → Encounters. Include only when relationships exist.
+- **Subplot Summaries** — one subsection per Subplot with entity list and arc description.
+- **Faction Table** — Name, Description, Role in the adventure.
+- **NPC Spotlight** — NPCs appearing in 2+ Subplots, or flagged as critical by the Director.
+- **Notable Items** — Name, Description, Owner, plot-critical flag.
+- **Encounter Map** — Encounters grouped by Subplot with Villain and Location references.
+- **Handouts** — Name, Content summary, Revealed status.
+- **Loose Entities** — Entities not threaded into any Subplot after the session.
+
+Wait for the Director's confirmation before proceeding to commit.
+
+---
+
+## Phase 5 — Commit
+
+After document planning is confirmed — or when the Director says **commit** at any point — present the corrections summary before writing anything.
+
+> ---
+> **Ready to commit.** Here's what I'll apply:
+>
+> **Entity file updates (<count>):**
+> - `npcs/mira.md` → `faction: ironveil-cult`
+> - `subplots/the-smuggling-ring.md` → new file
+> - `encounters/combat/the-handoff.md` → `villain: warden-groth`
+> *(etc.)*
+>
+> **No changes:** <count> entities confirmed as-is.
+>
+> Type **confirm** to apply all changes and generate `overview.md`, or tell me what to adjust.
+
+On **confirm**:
+
+1. Write all batched entity file corrections (update frontmatter using `python-frontmatter` conventions — preserve existing fields, update only changed ones).
+2. Create any new Subplot files approved during Phase 3.
+3. Generate `<adventure_root>/overview.md` using the agreed section list. Overwrite if it exists.
+4. Report:
+
+> **Done.**
+> - <count> entity files updated
+> - <count> new files created
+> - `overview.md` written: <count> sections, <count> Subplots charted
+>
+> Re-run `adventure-overview` after further enrichment to refresh the document.
+
+---
+
+## Generating overview.md
+
+Use this structure, including only sections agreed in Phase 4:
 
 ```
 # Overview: <Adventure Name>
 
-## Briefing
-
-<prose>
-
-## Narrative Structure
+## Adventure Flowchart
 
 ```mermaid
-<flowchart>
+flowchart TD
+  ...
 ```
 
-## Subplots and Threads
+## Subplot Summaries
 
-<one subsection per Subplot>
+### <Main Thread Name> *(Main Thread)*
+<arc description>
+**Connects to:** <Plot or "standalone">
+| Type | Name | Notes |
+...
 
-## Entity Reference
+### <Subplot Name>
+...
 
-### NPCs
-<table>
+## Faction Table
 
-### Villains
-<table>
+| Name | Description | Role |
+...
 
-### Locations
-<table>
+## NPC Spotlight
 
-### Factions
-<table>
+| Name | Subplots | Notes |
+...
 
-### Encounters
-<table>
+## Notable Items
 
-### Handouts
-<table>
+| Name | Description | Owner | Plot-Critical |
+...
 
-### Notable Items
-<table>
+## Encounter Map
 
-### Downtime Projects
-<table>
+| Name | Type | Subplot | Villain | Location |
+...
 
-## Director Focus
+## Handouts
 
-<only if the Director provided focus instructions>
+| Name | Content | Revealed |
+...
+
+## Loose Entities
+
+| Type | Name | Notes |
+...
 ```
 
----
+**Flowchart rules:**
+- Nodes: each Subplot, each Villain, each Campaign Plot referenced by a Subplot.
+- Edges: Subplot → Plot (`contributes to`); Villain → Combat Encounter (`leads`).
+- Omit nodes and edges where relationships are null.
+- Use display names (not slugs) for all labels.
+- If no relationships exist to chart, omit the section with a note: *No relationships found — enrich entity frontmatter and re-run.*
 
-### Briefing section
+**NPC Spotlight:** include NPCs appearing in 2 or more Subplots, or any NPC the Director flagged during the session.
 
-Write 3–5 paragraphs of narrative prose that **expand on the Adventure Summary** with post-curation knowledge. This is not a copy of the Adventure Summary — it integrates the enriched entity relationships the Director has set during curation.
-
-Cover:
-- The adventure's central conflict and what is at stake
-- The key Villains and their motivations (drawn from Villain descriptions)
-- The major Factions and their roles
-- The Subplots and how they connect to the main conflict
-- The shape of the adventure arc (how the Encounters sequence, if discernible from descriptions)
-
-Write for the Director as a prep aid, not a player synopsis.
-
----
-
-### Narrative Structure flowchart
-
-Generate a single Mermaid `flowchart TD` (top-down) diagram showing the high-level narrative structure.
-
-**Nodes to include:**
-- Each Subplot (include parent Plot name in the label if `plot` is non-null, e.g., `"The Missing Courier (→ Iron Tide)"`)
-- Each Villain
-- Each Combat Encounter that references a Villain
-
-**Edges to include:**
-- Subplot → parent Plot node (if `plot` is non-null): label `contributes to`
-- Villain → Combat Encounter (via encounter's `villain` field): label `leads`
-- Subplot → Villain (include only if the Villain's description explicitly mentions driving or anchoring the Subplot — use narrative judgment conservatively)
-
-**Rules:**
-- Omit any node whose relationships are all null (isolated nodes add no value)
-- Omit any edge where either endpoint has a null relationship field
-- Use display names, not slugs, for all node labels
-- If no relationships exist across any entity, omit this section entirely with a note: `_No relationships found — enrich entity frontmatter and re-run._`
-
-If Negotiations and Montages have a `location` that is also referenced by a major Subplot, add them as leaf nodes connected to that Location.
-
----
-
-### Subplots and Threads section
-
-One `###` subsection per Subplot. Each subsection contains:
-
-1. The Subplot's description (from frontmatter).
-2. If the Subplot has a parent `plot`, a line: `Contributes to Plot: <plot name>`.
-3. A **Entities in this thread** table with columns `Type | Name | Notes`, listing NPCs, Villains, Locations, Factions, and Encounters whose descriptions mention this Subplot or who are grouped here by narrative judgment. Notes is the entity's `description` field, truncated to ~100 characters if long.
-
-If no entities can be associated with a Subplot, write: `_No entities explicitly linked to this Subplot._`
-
-If there are no Subplots at all, write a single paragraph noting that no Subplots were found and suggest creating them with `create-entity`.
-
----
-
-### Entity Reference tables
-
-One `###` subsection per entity type, in the order listed in the Structure above. Omit any subsection where no entities of that type exist.
-
-**Standard columns for most types:**
-
-| Name | Description | Relationships |
-
-The Relationships cell lists only non-null relationship fields, formatted as `faction: Iron Covenant`, `location: Sunken Archive`, etc. using display names resolved from the slug-to-name index. If all relationships are null, the cell is empty.
-
-**Type-specific columns:**
-
-| Type | Extra columns |
-|------|---------------|
-| Handout | Add a `Revealed` column (`Yes` / `No`) |
-| Downtime Project | Add `Owner` (display name or `Unowned`) and `Progress` (`<project_points> / <project_goal>` or `0 / —` if `project_goal` is null) |
-
----
-
-### Director Focus section
-
-Include this section **only** if the Director provided focus instructions at invocation.
-
-Write a `## Director Focus` header, restate the focus instructions in a blockquote, then generate a focused subsection:
-
-- If the focus is on a specific Villain, write a "Villain's Scheme" subsection: list every Combat Encounter, Location, Faction, and NPC connected to that Villain.
-- If the focus is on Subplots, expand the per-Subplot entity tables with full descriptions (not truncated).
-- If the focus is on a Faction, write a "Faction Spotlight" subsection: list the Faction's description, all NPCs and Villains with that faction slug, and any Encounters at Locations that appear in those NPCs' location fields.
-- For any other focus instruction, apply judgment to produce a concise focused section relevant to the instruction.
-
----
-
-## Step 6 — Report to the Director
-
-After writing `overview.md`, report:
-
-> Overview written to `<adventure_root>/overview.md`
->
-> - Briefing: <X> paragraphs
-> - Subplots charted: <count> (or "none found")
-> - Entities indexed: <total count across all types>
-> - Mermaid diagram: included / omitted (reason if omitted)
->
-> Re-run at any time after enriching entity frontmatter to refresh the overview.
-
-If the Director provided focus instructions, add:
-
-> Focus section included: "<their instruction>"
+**Notable Items:** flag an item as plot-critical if the Director confirmed it during the session or if its description references the Main Thread conflict.

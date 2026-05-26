@@ -88,6 +88,14 @@ _Avoid_: storyline, story arc, campaign arc
 An Adventure-scoped named narrative thread; may contribute to a parent Plot.
 _Avoid_: plot, storyline, side quest
 
+**Main Thread**:
+The primary narrative throughline of an Adventure — the Subplot or chain of Subplots that defines the central conflict the Heroes are working toward. Identified during the adventure-overview session; the Director may correct the agent's inference. All other Subplots branch from or contribute to it.
+_Avoid_: main plot, primary storyline, main quest
+
+**Loose**:
+The state of an Adventure-scoped Entity that has not been assigned to any Subplot; the Entity exists in the Adventure but is not part of any named narrative thread. Loose Entities are surfaced during the adventure-overview session so the Director can thread them into a Subplot or acknowledge them as standalone.
+_Avoid_: orphan, unassigned, floating, unthreaded
+
 **Beat**:
 A discrete story-significant moment within a Session; Context only, not an Entity.
 _Avoid_: event, moment, scene
