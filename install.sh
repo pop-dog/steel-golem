@@ -32,11 +32,14 @@ link "$REPO/CONTEXT.md" "$STEEL_GOLEM_HOME/CONTEXT.md" "~/.steel-golem/CONTEXT.m
 # 3. Symlink steel-compendium
 link "$REPO/steel-compendium" "$STEEL_GOLEM_HOME/steel-compendium" "~/.steel-golem/steel-compendium"
 
-# 4. Create ~/.claude/agents/ if absent; symlink agent definition
+# 4. Symlink entity-schemas
+link "$REPO/skills/entity-schemas" "$STEEL_GOLEM_HOME/entity-schemas" "~/.steel-golem/entity-schemas"
+
+# 5. Create ~/.claude/agents/ if absent; symlink agent definition
 mkdir -p "$CLAUDE_HOME/agents"
 link "$REPO/agents/steel-golem.md" "$CLAUDE_HOME/agents/steel-golem.md" "~/.claude/agents/steel-golem.md"
 
-# 5. Create ~/.claude/skills/ if absent; symlink each skill directory
+# 6. Create ~/.claude/skills/ if absent; symlink each skill directory
 mkdir -p "$CLAUDE_HOME/skills"
 for skill_dir in "$REPO/skills"/*/; do
     skill_name="$(basename "$skill_dir")"
