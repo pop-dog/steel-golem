@@ -191,7 +191,6 @@ def create_adventure(name: str) -> Path:
         name=name,
         slug=slug,
         created=datetime.date.today(),
-        status="active",
     )
     index_path = adventure_root / "index.md"
     index_path.write_text(frontmatter.dumps(post))

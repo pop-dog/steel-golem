@@ -333,14 +333,14 @@ class TestCreateAdventure:
         )
         assert post["slug"] == "the-sunken-vault"
 
-    def test_index_md_frontmatter_status_active(self, tmp_path):
+    def test_index_md_frontmatter_no_status_field(self, tmp_path):
         campaign_root, fake_config_dir = _make_campaign(tmp_path)
         with patch("steel_golem.scaffold.CONFIG_DIR", fake_config_dir):
             create_adventure(name="The Sunken Vault")
         post = frontmatter.load(
             str(campaign_root / "adventures" / "the-sunken-vault" / "index.md")
         )
-        assert post["status"] == "active"
+        assert "status" not in post
 
     def test_index_md_frontmatter_created_is_date_object(self, tmp_path):
         campaign_root, fake_config_dir = _make_campaign(tmp_path)
