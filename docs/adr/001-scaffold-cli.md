@@ -74,11 +74,10 @@ current_adventure: null
 name: The Sunken Vault
 slug: the-sunken-vault
 created: 2026-05-17
-status: active
 ---
 ```
 
-No `campaign` field — the adventure's location in the directory tree encodes the campaign relationship.
+No `campaign` field — the adventure's location in the directory tree encodes the campaign relationship. No `status` field — active/inactive state is conveyed by whether this adventure's slug matches `current_adventure` in the campaign `index.md`.
 
 ### 10. `adventures new` does not change the active adventure, except when null
 
